@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calibration — First-Contact Field Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,500;1,400;1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#12181A;
+    --panel:#1A2321;
+    --panel-2:#1F2927;
+    --line:#2C3735;
+    --ink:#E9E4D8;
+    --muted:#8A9895;
+    --muted-2:#5C6B69;
+    --accent:#D9A441;
+    --accent-dim:#7A6031;
+    --accent-2:#6FA8A0;
+    --radius:3px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Source Serif 4', serif;
+    min-height:100vh;
+    padding:32px 20px 80px;
+  }
+  .app{max-width:900px; margin:0 auto;}
+
+  /* ---------- Header ---------- */
+  header{display:flex; flex-direction:column; align-items:center; text-align:center; margin-bottom:36px;}
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.18em;
+    color:var(--accent-2);
+    text-transform:uppercase;
+    margin-bottom:10px;
+  }
+  h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:clamp(28px, 5vw, 40px);
+    letter-spacing:-0.01em;
+    margin-bottom:10px;
+  }
+  .sub{
+    color:var(--muted);
+    font-size:15px;
+    font-style:italic;
+    max-width:480px;
+    line-height:1.5;
+  }
+
+  /* ---------- Gauge ---------- */
+  .gauge-wrap{margin:26px 0 8px; display:flex; justify-content:center;}
+  .gauge-label{
+    font-family:'JetBrains Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.14em;
+    color:var(--muted-2);
+    text-align:center;
+    margin-top:2px;
+    text-transform:uppercase;
+  }
+  #needle{ transform-origin: 150px 150px; transition: transform 0.6s cubic-bezier(.34,1.4,.64,1); }
+  .tick-label{ font-family:'JetBrains Mono', monospace; font-size:9px; fill:var(--muted-2); letter-spacing:0.05em; }
+  .tick-label.active{ fill:var(--accent); }
+
+  /* ---------- Time selector ---------- */
+  .time-select{
+    display:flex; gap:8px; justify-content:center; margin-top:22px; flex-wrap:wrap;
+  }
+  .time-btn{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:7px 16px;
+    color:var(--muted);
+    cursor:pointer;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.05em;
+    transition:border-color 0.2s, color 0.2s, background 0.2s;
+  }
+  .time-btn:hover{ border-color:var(--accent-dim); color:var(--ink); }
+  .time-btn.active{ border-color:var(--accent); background:var(--panel-2); color:var(--accent); }
+  .time-hint{
+    text-align:center;
+    font-size:12px;
+    color:var(--muted-2);
+    font-style:italic;
+    margin-top:8px;
+  }
+
+  /* ---------- Context grid ---------- */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:8px;
+    margin-bottom:8px;
+  }
+  @media (max-width:640px){ .grid{ grid-template-columns:repeat(2, 1fr); } }
+
+  .ctx-btn{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:14px 10px;
+    color:var(--ink);
+    cursor:pointer;
+    text-align:left;
+    font-family:'Space Grotesk', sans-serif;
+    transition:border-color 0.2s, background 0.2s;
+  }
+  .ctx-btn:hover{ border-color:var(--accent-dim); background:var(--panel-2); }
+  .ctx-btn.active{ border-color:var(--accent); background:var(--panel-2); }
+  .ctx-code{
+    font-family:'JetBrains Mono', monospace;
+    font-size:10px;
+    color:var(--accent-2);
+    letter-spacing:0.1em;
+    display:block;
+    margin-bottom:6px;
+  }
+  .ctx-name{ font-weight:600; font-size:14px; display:block; margin-bottom:3px; }
+  .ctx-desc{ font-family:'Source Serif 4', serif; font-size:12px; color:var(--muted); font-style:italic; }
+
+  /* ---------- Routine panel ---------- */
+  #routinePanel{ margin-top:30px; }
+  .routine-head{
+    display:flex; align-items:baseline; justify-content:space-between;
+    border-bottom:1px solid var(--line); padding-bottom:10px; margin-bottom:18px;
+    flex-wrap:wrap; gap:6px;
+  }
+  .routine-title{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:19px; }
+  .routine-meta{ font-family:'JetBrains Mono', monospace; font-size:10px; color:var(--muted-2); letter-spacing:0.08em; text-transform:uppercase; }
+
+  .step{
+    display:grid;
+    grid-template-columns:34px 1fr;
+    gap:14px;
+    padding:16px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .step:last-child{ border-bottom:none; }
+  .step-index{
+    font-family:'JetBrains Mono', monospace;
+    color:var(--accent);
+    font-size:13px;
+    padding-top:2px;
+  }
+  .step-title{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:15px; margin-bottom:5px; }
+  .exposure{
+    display:flex; align-items:center; gap:6px; margin:6px 0 8px;
+  }
+  .exposure-label{ font-family:'JetBrains Mono', monospace; font-size:9px; color:var(--muted-2); text-transform:uppercase; letter-spacing:0.08em; }
+  .exposure-bar{ flex:1; height:3px; background:var(--line); border-radius:2px; overflow:hidden; max-width:160px; }
+  .exposure-fill{ height:100%; background:var(--accent); border-radius:2px; }
+  .step-note{ color:var(--muted); font-size:13px; line-height:1.5; margin-bottom:8px; }
+  .line{
+    font-style:italic;
+    font-size:14px;
+    color:var(--ink);
+    padding:8px 12px;
+    background:var(--panel);
+    border-left:2px solid var(--accent-2);
+    border-radius:0 var(--radius) var(--radius) 0;
+    margin-top:6px;
+  }
+
+  /* ---------- Notes panel ---------- */
+  #notesPanel{ margin-top:34px; padding-top:22px; border-top:1px solid var(--line); }
+  .notes-head{ font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:15px; margin-bottom:4px; }
+  .notes-sub{ color:var(--muted); font-size:12px; font-style:italic; margin-bottom:14px; }
+  .notes-row{ display:flex; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
+  input[type=text], textarea{
+    background:var(--panel);
+    border:1px solid var(--line);
+    color:var(--ink);
+    font-family:'Source Serif 4', serif;
+    font-size:13px;
+    padding:9px 10px;
+    border-radius:var(--radius);
+    flex:1;
+    min-width:160px;
+  }
+  input[type=text]:focus, textarea:focus{ outline:none; border-color:var(--accent-dim); }
+  textarea{ width:100%; min-height:64px; resize:vertical; margin-bottom:8px; }
+  .save-btn{
+    background:var(--accent-dim);
+    color:var(--ink);
+    border:none;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    padding:9px 16px;
+    border-radius:var(--radius);
+    cursor:pointer;
+    transition:background 0.2s;
+  }
+  .save-btn:hover{ background:var(--accent); color:var(--bg); }
+
+  .saved-list{ margin-top:16px; display:flex; flex-direction:column; gap:6px; }
+  .saved-item{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:9px 12px;
+    cursor:pointer;
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+  }
+  .saved-item:hover{ border-color:var(--accent-dim); }
+  .saved-name{ font-family:'Space Grotesk', sans-serif; font-size:13px; font-weight:600; }
+  .saved-ctx{ font-family:'JetBrains Mono', monospace; font-size:9px; color:var(--muted-2); text-transform:uppercase; }
+  .saved-del{ font-family:'JetBrains Mono', monospace; font-size:10px; color:var(--muted-2); cursor:pointer; padding:2px 6px; }
+  .saved-del:hover{ color:var(--accent); }
+  .empty-note{ color:var(--muted-2); font-size:12px; font-style:italic; }
+  .status{ font-family:'JetBrains Mono', monospace; font-size:10px; color:var(--accent-2); margin-top:6px; height:14px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="eyebrow">First-Contact Field Guide</div>
+    <h1>Calibration</h1>
+    <p class="sub">Pick the situation. Get a six-step sequence for reading someone's baseline before you actually have one.</p>
+    <div class="gauge-wrap">
+      <svg id="gauge" width="300" height="160" viewBox="0 0 300 160">
+        <path d="M 30 150 A 120 120 0 0 1 270 150" fill="none" stroke="#2C3735" stroke-width="1"/>
+        <g id="ticks"></g>
+        <line id="needle" x1="150" y1="150" x2="150" y2="55" stroke="#D9A441" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="150" cy="150" r="5" fill="#D9A441"/>
+        <circle cx="150" cy="150" r="2" fill="#12181A"/>
+      </svg>
+    </div>
+    <div class="gauge-label" id="gaugeLabel">Select a channel below</div>
+  </header>
+
+  <section class="grid" id="grid"></section>
+
+  <section id="routinePanel" hidden>
+    <div class="routine-head">
+      <div class="routine-title" id="rTitle"></div>
+      <div class="routine-meta">Exposure: low → direct</div>
+    </div>
+    <div id="steps"></div>
+  </section>
+
+  <section id="notesPanel" hidden>
+    <div class="notes-head">Log this person</div>
+    <div class="notes-sub">A quick note on what you actually noticed — the start of a real baseline, next time.</div>
+    <div class="notes-row">
+      <input type="text" id="nameInput" placeholder="Name" maxlength="60">
+    </div>
+    <textarea id="notesInput" placeholder="Pace, energy, what shifted when the stakes went up, anything that seemed like their normal..."></textarea>
+    <button class="save-btn" id="saveBtn">Save entry</button>
+    <div class="status" id="status"></div>
+    <div class="saved-list" id="savedList"></div>
+  </section>
+
+</div>
+
+<script>
+const DATA = [
+  { code:"WORK", name:"New colleague", desc:"First week meeting someone on the team",
+    steps:[
+      {title:"Open with pattern, not content", exposure:1, note:"Content doesn't matter — delivery does.", lines:["What'd you work on before this?", "What's the week looked like so far?"]},
+      {title:"Ask one direct default question", exposure:2, note:"Frame as their working style, not a performance review.", lines:["Are you more heads-down, or do you like thinking out loud with people?"]},
+      {title:"Mirror a light, low-confidence read", exposure:3, note:"Let them correct you — the correction is the data.", lines:["You seem pretty unbothered by the deadline."]},
+      {title:"Route one question through 'other people'", exposure:4, note:"Lower-exposure way to ask about their stress pattern.", lines:["What do people on your last team say you're like under a crunch?"]},
+      {title:"Raise the stakes slightly, watch the shift", exposure:5, note:"Bring up a real disagreement — a tool, a process, a call someone made. Watch pace and precision, not their words.", lines:["Honestly I think that approach has a real flaw — what's your take?"]},
+      {title:"Close with a direct 'is this normal' check", exposure:6, note:"By now it's earned.", lines:["Is this a pretty normal week for you, or has it been unusual?"]}
+    ]
+  },
+  { code:"NET", name:"Networking event", desc:"Conference, mixer, industry event",
+    steps:[
+      {title:"Open with pattern, not content", exposure:1, note:"Watch whether they scan the room while talking.", lines:["What brought you here tonight?"]},
+      {title:"Ask one direct default question", exposure:2, note:"", lines:["Are you someone who works the room, or do you find one or two people and stay put?"]},
+      {title:"Mirror a light, low-confidence read", exposure:3, note:"", lines:["You seem like you've done a lot of these."]},
+      {title:"Route one question through 'other people'", exposure:4, note:"Surfaces whether they're easy or hard to read.", lines:["Do people say you're easy to read, or do you keep things pretty close?"]},
+      {title:"Raise the stakes slightly, watch the shift", exposure:5, note:"A pointed opinion question about their field — watch if they get more precise or vaguer under a real question.", lines:["What's the thing people in your field are getting wrong right now?"]},
+      {title:"Close with a direct 'is this normal' check", exposure:6, note:"", lines:["Is this your normal networking mode, or are you feeling it tonight?"]}
+    ]
+  },
+  { code:"DATE", name:"First date", desc:"Meeting someone romantically for the first time",
+    steps:[
+      {title:"Open with pattern, not content", exposure:1, note:"Skip the résumé questions — watch delivery instead.", lines:["How was your day, actually?"]},
+      {title:"Ask one direct default question", exposure:2, note:"", lines:["Are you more of a planner, or do you like winging it?"]},
+      {title:"Mirror a light, low-confidence read", exposure:3, note:"Said with real uncertainty, not as a line.", lines:["You seem pretty relaxed for a first date — or is that just you?"]},
+      {title:"Route one question through 'other people'", exposure:4, note:"", lines:["Do your friends say you're an open book, or hard to read?"]},
+      {title:"Raise the stakes slightly, watch the shift", exposure:5, note:"A mildly vulnerable topic or a gentle disagreement — not a big one.", lines:["I actually disagree with you on that — where's that coming from for you?"]},
+      {title:"Close with a direct 'is this normal' check", exposure:6, note:"Only if it fits naturally — don't force it.", lines:["Is this pretty much you, or do first dates just make everyone weird?"]}
+    ]
+  },
+  { code:"SOCIAL", name:"Party / friend-of-a-friend", desc:"Meeting someone through your social circle",
+    steps:[
+      {title:"Open with pattern, not content", exposure:1, note:"", lines:["How do you know everyone here?"]},
+      {title:"Ask one direct default question", exposure:2, note:"", lines:["Are you a big-group person, or do you peel off into corners?"]},
+      {title:"Mirror a light, low-confidence read", exposure:3, note:"", lines:["You seem like you're having a good time."]},
+      {title:"Route one question through 'other people'", exposure:4, note:"", lines:["Are you the loud one or the quiet one in your friend group?"]},
+      {title:"Raise the stakes slightly, watch the shift", exposure:5, note:"Light banter or teasing disagreement — watch if they lean in or go flat.", lines:["No way, that's a terrible take."]},
+      {title:"Close with a direct 'is this normal' check", exposure:6, note:"", lines:["Is this your normal party energy?"]}
+    ]
+  },
+  { code:"NBHD", name:"New neighbor", desc:"Someone who's just moved in nearby",
+    steps:[
+      {title:"Open with pattern, not content", exposure:1, note:"", lines:["How long have you been on the block?"]},
+      {title:"Ask one direct default question", exposure:2, note:"", lines:["Are you the type to pop by, or more of a wave-from-the-porch person?"]},
+      {title:"Mirror a light, low-confidence read", exposure:3, note:"", lines:["You seem pretty easygoing about all this."]},
+      {title:"Route one question through 'other people'", exposure:4, note:"", lines:["Do people say you're friendly-but-private, or an open door?"]},
+      {title:"Raise the stakes slightly, watch the shift", exposure:5, note:"A hypothetical mild friction point — shared fence, noise, parking.", lines:["Hypothetically, if something like that ever came up between us, would you rather I just knock, or text first?"]},
+      {title:"Close with a direct 'is this normal' check", exposure:6, note:"", lines:["Is this pretty much how you usually are, or is today just a good day?"]}
+    ]
+  },
+  { code:"FAM", name:"Partner's family", desc:"Meeting a partner's parents, siblings, or relatives",
+    steps:[
+      {title:"Open with pattern, not content", exposure:1, note:"", lines:["What was [partner] like growing up?"]},
+      {title:"Ask one direct default question", exposure:2, note:"", lines:["Are you the type who says what's on your mind, or more of a keep-the-peace person?"]},
+      {title:"Mirror a light, low-confidence read", exposure:3, note:"", lines:["You seem pretty relaxed having me here."]},
+      {title:"Route one question through 'other people'", exposure:4, note:"", lines:["What do the kids say you're like when something bugs you?"]},
+      {title:"Raise the stakes slightly, watch the shift", exposure:5, note:"A gentle difference of opinion — a tradition, a small preference, nothing political.", lines:["We actually do that a little differently in my family — what do you think of that?"]},
+      {title:"Close with a direct 'is this normal' check", exposure:6, note:"", lines:["Is this a pretty typical gathering, or is tonight different?"]}
+    ]
+  },
+  { code:"STAKES", name:"Formal / high-stakes", desc:"Interview, client meeting, or first business conversation",
+    steps:[
+      {title:"Open with pattern, not content", exposure:1, note:"", lines:["Walk me through what a normal day looks like for you."]},
+      {title:"Ask one direct default question", exposure:2, note:"", lines:["Do you think out loud, or do you like to gather your thoughts before answering?"]},
+      {title:"Mirror a light, low-confidence read", exposure:3, note:"", lines:["You seem pretty comfortable with this kind of conversation."]},
+      {title:"Route one question through 'other people'", exposure:4, note:"", lines:["What would your team say you're like under real pressure?"]},
+      {title:"Raise the stakes slightly, watch the shift", exposure:5, note:"A harder follow-up, or a gentle push back on their last answer.", lines:["Can you push on that a bit more — what would you do if that assumption were wrong?"]},
+      {title:"Close with a direct 'is this normal' check", exposure:6, note:"", lines:["Does this setting change how you come across, or is this pretty much you?"]}
+    ]
+  }
+];
+
+const grid = document.getElementById('grid');
+const routinePanel = document.getElementById('routinePanel');
+const notesPanel = document.getElementById('notesPanel');
+const stepsEl = document.getElementById('steps');
+const rTitle = document.getElementById('rTitle');
+const gaugeLabel = document.getElementById('gaugeLabel');
+const needle = document.getElementById('needle');
+const ticksG = document.getElementById('ticks');
+let activeIndex = null;
+
+// Build gauge ticks
+const N = DATA.length;
+const startAngle = -90, endAngle = 90; // degrees, -90 = left, 90 = right (0 = up)
+DATA.forEach((ctx, i) => {
+  const angle = startAngle + (endAngle - startAngle) * (i / (N - 1));
+  const rad = (angle - 90) * Math.PI / 180;
+  const tx = 150 + 132 * Math.cos(rad);
+  const ty = 150 + 132 * Math.sin(rad);
+  const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+  t.setAttribute("x", tx);
+  t.setAttribute("y", ty);
+  t.setAttribute("text-anchor", "middle");
+  t.setAttribute("class", "tick-label");
+  t.setAttribute("id", "tick-" + i);
+  t.textContent = ctx.code;
+  ticksG.appendChild(t);
+});
+
+function setGauge(i){
+  const angle = startAngle + (endAngle - startAngle) * (i / (N - 1));
+  needle.setAttribute("transform", `rotate(${angle} 150 150)`);
+  document.querySelectorAll('.tick-label').forEach(el => el.classList.remove('active'));
+  document.getElementById('tick-' + i).classList.add('active');
+}
+
+function renderGrid(){
+  grid.innerHTML = '';
+  DATA.forEach((ctx, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'ctx-btn' + (i === activeIndex ? ' active' : '');
+    btn.innerHTML = `<span class="ctx-code">${ctx.code}</span><span class="ctx-name">${ctx.name}</span><span class="ctx-desc">${ctx.desc}</span>`;
+    btn.onclick = () => selectContext(i);
+    grid.appendChild(btn);
+  });
+}
+
+function selectContext(i){
+  activeIndex = i;
+  renderGrid();
+  setGauge(i);
+  const ctx = DATA[i];
+  gaugeLabel.textContent = "Tuned to — " + ctx.name;
+  rTitle.textContent = ctx.name;
+  stepsEl.innerHTML = '';
+  ctx.steps.forEach((s, idx) => {
+    const div = document.createElement('div');
+    div.className = 'step';
+    const pct = Math.round((s.exposure / 6) * 100);
+    div.innerHTML = `
+      <div class="step-index">${idx + 1}</div>
+      <div>
+        <div class="step-title">${s.title}</div>
+        <div class="exposure">
+          <span class="exposure-label">exposure</span>
+          <div class="exposure-bar"><div class="exposure-fill" style="width:${pct}%"></div></div>
+        </div>
+        ${s.note ? `<div class="step-note">${s.note}</div>` : ''}
+        ${s.lines.map(l => `<div class="line">"${l}"</div>`).join('')}
+      </div>
+    `;
+    stepsEl.appendChild(div);
+  });
+  routinePanel.hidden = false;
+  notesPanel.hidden = false;
+  routinePanel.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+// ---------- Notes / storage ----------
+const nameInput = document.getElementById('nameInput');
+const notesInput = document.getElementById('notesInput');
+const saveBtn = document.getElementById('saveBtn');
+const savedList = document.getElementById('savedList');
+const statusEl = document.getElementById('status');
+
+async function loadSaved(){
+  savedList.innerHTML = '';
+  try{
+    const list = await window.storage.list('contact:');
+    if(!list || !list.keys || list.keys.length === 0){
+      savedList.innerHTML = '<div class="empty-note">No entries yet.</div>';
+      return;
+    }
+    const entries = [];
+    for(const key of list.keys){
+      try{
+        const res = await window.storage.get(key);
+        if(res) entries.push({key, data: JSON.parse(res.value)});
+      }catch(e){ /* skip unreadable entry */ }
+    }
+    entries.sort((a,b) => (b.data.ts||0) - (a.data.ts||0));
+    entries.forEach(({key, data}) => {
+      const item = document.createElement('div');
+      item.className = 'saved-item';
+      item.innerHTML = `<div><div class="saved-name">${data.name}</div><div class="saved-ctx">${data.ctxName || ''}</div></div><span class="saved-del">remove</span>`;
+      item.querySelector('div').onclick = () => {
+        nameInput.value = data.name;
+        notesInput.value = data.notes;
+      };
+      item.querySelector('.saved-del').onclick = async (e) => {
+        e.stopPropagation();
+        try{ await window.storage.delete(key); loadSaved(); }catch(err){}
+      };
+      savedList.appendChild(item);
+    });
+  }catch(e){
+    savedList.innerHTML = '<div class="empty-note">Couldn\\'t load saved entries.</div>';
+  }
+}
+
+saveBtn.onclick = async () => {
+  const name = nameInput.value.trim();
+  const notes = notesInput.value.trim();
+  if(!name){ statusEl.textContent = 'Add a name first.'; return; }
+  const key = 'contact:' + name.toLowerCase().replace(/[^a-z0-9]/g, '_').slice(0, 100);
+  const data = {
+    name,
+    notes,
+    ctxName: activeIndex !== null ? DATA[activeIndex].name : '',
+    ts: Date.now()
+  };
+  try{
+    const res = await window.storage.set(key, JSON.stringify(data), false);
+    if(res){
+      statusEl.textContent = 'Saved.';
+      nameInput.value = '';
+      notesInput.value = '';
+      loadSaved();
+    }else{
+      statusEl.textContent = 'Save failed — try again.';
+    }
+  }catch(e){
+    statusEl.textContent = 'Save failed — try again.';
+  }
+  setTimeout(() => statusEl.textContent = '', 2500);
+};
+
+renderGrid();
+loadSaved();
+</script>
+</body>
+</html>
