@@ -1,0 +1,17 @@
+{
+  "user_id": "raines",
+  "current_state": "guide",
+  "user_battery": "charged",
+  "conversation_count": 0,
+  "last_interaction": "2026-08-19T15:29:53.685455",
+  "state_entered_at": "2026-08-19T15:29:53.684923",
+  "saved_at": "2026-08-19T21:18:57.895507",
+  "user_state": {
+    "energy_level": 1.0,
+    "stress_level": 0.0,
+    "clarity_score": 1.0,
+    "emotional_tone": "neutral",
+    "typing_speed": 60.0,
+    "time_of_day": "unknown"
+  }
+}

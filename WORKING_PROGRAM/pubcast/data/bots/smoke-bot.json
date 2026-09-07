@@ -1,0 +1,17 @@
+{
+  "bot_id": "smoke-bot",
+  "name": "Smoke Bot",
+  "owner_id": "",
+  "provider": "ollama",
+  "model": "llama3",
+  "api_key_env": "PUBCAST_OLLAMA_KEY",
+  "rooms": [
+    "control"
+  ],
+  "system_prompt": "Stay brief.",
+  "auto_reply": true,
+  "mention_only": false,
+  "shadow_presence": true,
+  "max_history": 20,
+  "temperature": 0.85
+}

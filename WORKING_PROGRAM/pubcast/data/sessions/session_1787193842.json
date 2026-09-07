@@ -1,0 +1,44 @@
+{
+  "session_id": "session_1787193842",
+  "project_id": "default",
+  "created_at": 1787193842.6885958,
+  "host_user_id": null,
+  "participants": {
+    "test_guest": {
+      "user_id": "test_guest",
+      "display_name": "Test Guest",
+      "credit_name": "Test Guest",
+      "project_role": [],
+      "session_role": [],
+      "license_role": "personal",
+      "presence_mode": "avatar_static",
+      "availability": "available",
+      "creditable": true,
+      "joined_at": 1787193842.688601,
+      "last_seen_at": 1787193842.6886098,
+      "left_at": null,
+      "dressing_room_id": "dressing_29291cb3404c8ceb",
+      "call_handle": "session_1787193842:d8a7291dddc0",
+      "contributed_changes": false
+    }
+  },
+  "session_credits": [
+    {
+      "user_id": "test_guest",
+      "display_name": "Test Guest",
+      "credit_name": "Test Guest",
+      "project_role": [],
+      "session_role": [],
+      "license_role": "personal",
+      "joined_at": 1787193842.688601,
+      "left_at": null,
+      "creditable": true,
+      "contributed_changes": false,
+      "call_handle": "session_1787193842:d8a7291dddc0",
+      "dressing_room_id": "dressing_29291cb3404c8ceb",
+      "availability": "available"
+    }
+  ],
+  "role_events": [],
+  "updated_at": 1787193842.6886458
+}

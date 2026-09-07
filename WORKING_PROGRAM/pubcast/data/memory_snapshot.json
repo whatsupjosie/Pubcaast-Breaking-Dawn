@@ -1,0 +1,44 @@
+{
+  "saved_at": 1786927812.6232364,
+  "profiles": {
+    "bot-pete": {
+      "character_id": "bot-pete",
+      "name": "Pete",
+      "role": "host",
+      "personality": {},
+      "backstory": "",
+      "created_at": 1786927812.4638858
+    },
+    "bot-repeat": {
+      "character_id": "bot-repeat",
+      "name": "RePete",
+      "role": "host",
+      "personality": {},
+      "backstory": "",
+      "created_at": 1786927812.463884
+    },
+    "bot-sir_purfluous": {
+      "character_id": "bot-sir_purfluous",
+      "name": "Sir Purfluous",
+      "role": "host",
+      "personality": {},
+      "backstory": "",
+      "created_at": 1786927812.4638882
+    },
+    "bot-smoke-bot": {
+      "character_id": "bot-smoke-bot",
+      "name": "Smoke Bot",
+      "role": "host",
+      "personality": {},
+      "backstory": "",
+      "created_at": 1786927812.4638872
+    }
+  },
+  "banks": {
+    "bot-pete": [],
+    "bot-repeat": [],
+    "bot-sir_purfluous": [],
+    "bot-smoke-bot": []
+  },
+  "global": []
+}

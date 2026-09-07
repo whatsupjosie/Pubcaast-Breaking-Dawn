@@ -1,0 +1,30 @@
+{
+  "session_id": "switchblade_background_e2b_smoke",
+  "packets": {
+    "codex_smoke": {
+      "user_id": "codex_smoke",
+      "session_id": "switchblade_background_e2b_smoke",
+      "project_id": "default",
+      "room_id": "default",
+      "alex_state": "guide",
+      "user_battery": "charged",
+      "tone_guidance": "steady",
+      "pace_guidance": "normal",
+      "intervention_style": "light",
+      "fragility_level": 0.0,
+      "care_priority": "low",
+      "do_not_touch": [],
+      "active_threads": [
+        "entered"
+      ],
+      "resumed_from_memory": true,
+      "remembered_memory_count": 4,
+      "recent_memory_types": [
+        "factual"
+      ],
+      "display_name": "codex_smoke",
+      "bridge_scope": "entry",
+      "generated_at": 1781552009.5076365
+    }
+  }
+}

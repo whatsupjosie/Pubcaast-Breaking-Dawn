@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Foresight — The Counter</title>
+<style>
+:root{
+  --bg:#090b0c; --panel:#14181a; --panel2:#0e1112;
+  --line:#8e6336; --line2:#c28a4c; --gold:#d9a35b; --cream:#efe0c6;
+  --text:#eadcc7; --muted:#918678; --green:#75a968; --red:#a96557;
+  --shadow:0 24px 70px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.035);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:
+  radial-gradient(ellipse at 50% 0%,rgba(177,119,57,.14),transparent 38%),
+  radial-gradient(ellipse at 10% 70%,rgba(94,61,36,.10),transparent 36%),
+  #060809;
+  color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input{font:inherit;color:inherit}
+
+/* ---- top bar ---- */
+.topbar{height:52px;display:flex;align-items:center;gap:16px;padding:0 18px;
+  border-bottom:1px solid #3d2c1c;background:linear-gradient(180deg,#14181a,#0b0d0e)}
+.topbar .brand{display:flex;align-items:center;gap:10px;font-family:Georgia,serif;
+  letter-spacing:.1em;font-size:15px;color:#ecd8b8}
+.topbar .brand .mark{width:18px;height:24px;border:1px solid var(--gold);border-radius:50% 50% 40% 40%;
+  display:grid;place-items:center;color:var(--gold);font-size:10px;box-shadow:0 0 14px #b7793744}
+.topbar .status{margin-left:auto;display:flex;gap:14px;font-size:11px;color:var(--muted)}
+.topbar .status b{color:var(--gold)}
+.dotstat{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px}
+.dotstat.up{background:var(--green);box-shadow:0 0 6px var(--green)}
+.dotstat.down{background:var(--red);box-shadow:0 0 6px var(--red)}
+.dotstat.checking{background:#7a6a4c}
+
+/* ---- upper-left control anchor ---- */
+.anchor{position:fixed;left:16px;top:64px;z-index:500;display:flex;flex-direction:column;align-items:center;gap:8px}
+.lantern{width:44px;height:56px;border:1px solid var(--line2);border-radius:50% 50% 42% 42%;
+  background:radial-gradient(circle at 50% 40%,#4d321e,#161313 68%);
+  display:grid;place-items:center;color:var(--gold);cursor:pointer;
+  box-shadow:0 0 24px rgba(216,153,68,.28), inset 0 0 14px rgba(216,153,68,.18);
+  transition:box-shadow .25s}
+.lantern:hover{box-shadow:0 0 34px rgba(216,153,68,.42), inset 0 0 16px rgba(216,153,68,.24)}
+.lantern .spark{font-size:15px;filter:drop-shadow(0 0 4px #f3cf8f)}
+.blades{display:flex;flex-direction:column;gap:6px;max-height:76vh;overflow-y:auto;padding-right:2px}
+.blade{width:190px;min-height:34px;border:1px solid #6d4b2d;border-radius:6px 14px 14px 6px;
+  background:linear-gradient(90deg,#1c1712,#121617);text-align:left;padding:7px 12px;
+  color:#cbb99f;font-size:11px;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:8px;
+  transform:skewX(-3deg)}
+.blade:hover{border-color:#c48b4e;transform:translateX(3px) skewX(-3deg)}
+.blade.active{border-color:var(--gold);color:var(--cream)}
+.blade .b-ico{opacity:.75}
+.blade.blank{color:#9c9080;font-style:italic;justify-content:center}
+.blade .b-close{margin-left:auto;opacity:.5;font-size:10px;padding:2px 5px}
+.blade .b-close:hover{opacity:1;color:#e08a6f}
+
+/* ---- counter workspace ---- */
+.counter{position:absolute;left:0;right:0;top:52px;bottom:0;overflow:hidden}
+.counter-surface{position:relative;width:100%;height:100%}
+.counter-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  color:#4a4136;font-size:13px;letter-spacing:.08em;pointer-events:none;text-align:center;padding:40px}
+
+/* ---- trays ---- */
+.tray{position:absolute;background:linear-gradient(145deg,rgba(24,29,30,.97),rgba(11,14,15,.97));
+  border:1px solid #5d4229;border-radius:16px;box-shadow:var(--shadow);
+  display:flex;flex-direction:column;overflow:hidden;min-width:280px;min-height:180px}
+.tray.dragging,.tray.resizing{opacity:.92;box-shadow:0 30px 90px rgba(0,0,0,.7)}
+.tray.focused{border-color:var(--gold)}
+.tray-head{display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:grab;
+  background:linear-gradient(180deg,#1d2223,#14181a);border-bottom:1px solid #3d2c1c;user-select:none}
+.tray-head:active{cursor:grabbing}
+.tray-head .t-title{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#cbb99f;flex:1;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tray-head .t-dot{width:6px;height:6px;border-radius:50%}
+.tray-head button{background:none;border:1px solid #4b3a2b;border-radius:6px;color:#b3a68f;
+  width:22px;height:22px;cursor:pointer;font-size:11px;line-height:1;display:grid;place-items:center}
+.tray-head button:hover{border-color:var(--gold);color:var(--gold)}
+.tray-body{flex:1;position:relative;background:#08090a;min-height:0}
+.tray-body iframe{width:100%;height:100%;border:0;background:#0b0d0e}
+.resize-grip{position:absolute;right:2px;bottom:2px;width:16px;height:16px;cursor:nwse-resize;
+  border-right:2px solid #6d4b2d;border-bottom:2px solid #6d4b2d;border-radius:0 0 6px 0;opacity:.6}
+.resize-grip:hover{opacity:1;border-color:var(--gold)}
+.tray.falling{transition:transform .55s cubic-bezier(.55,-0.1,.9,.35), opacity .55s linear;
+  transform:translateY(140vh) rotate(14deg);opacity:0}
+
+/* status widget (for PubPartner / 2i, which have no page of their own — real live data, no page chrome) */
+.statuswrap{padding:16px;height:100%;overflow:auto}
+.statuswrap h3{margin:0 0 4px;font:500 15px Georgia,serif;color:#e3cfa9}
+.statuswrap .sub{color:var(--muted);font-size:11px;margin-bottom:14px}
+.srow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #241f19;font-size:12px}
+.srow span:last-child{color:#c9b79c}
+.pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;letter-spacing:.05em}
+.pill.ok{background:#1c2b19;color:#8fbd80;border:1px solid #375a2e}
+.pill.bad{background:#2b1c19;color:#d19080;border:1px solid #5a3129}
+.pill.wait{background:#241f19;color:#c9b79c;border:1px solid #4b3a2b}
+.serr{color:#c78267;font-size:11px;margin-top:10px}
+
+/* ---- picker modal ---- */
+.modal-veil{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;z-index:900}
+.modal-veil.open{display:flex}
+.modal{width:560px;max-width:92vw;max-height:80vh;overflow:auto;background:linear-gradient(145deg,#181d1e,#0c0f10);
+  border:1px solid #6d4b2d;border-radius:18px;box-shadow:var(--shadow);padding:20px}
+.modal h2{margin:0 0 3px;font:500 17px Georgia,serif;color:#ecd8b8}
+.modal .sub{color:var(--muted);font-size:11px;margin-bottom:16px}
+.pgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.pitem{border:1px solid #4b3a2b;border-radius:12px;padding:12px;background:#111516;cursor:pointer;text-align:left}
+.pitem:hover{border-color:var(--gold);background:#151a1b}
+.pitem b{display:block;font-size:12px;color:#e3cfa9;margin-bottom:3px}
+.pitem span{font-size:10px;color:var(--muted)}
+.modal-close{margin-top:16px;border:1px solid #4b3a2b;background:#111516;color:#b3a68f;border-radius:10px;
+  padding:8px 14px;cursor:pointer;font-size:11px}
+
+.toast{position:fixed;right:24px;bottom:24px;background:#161b1c;border:1px solid #876038;border-radius:12px;
+  padding:11px 14px;color:#d6c5aa;font-size:11px;box-shadow:0 10px 35px #0008;opacity:0;
+  transform:translateY(8px);pointer-events:none;transition:.2s;z-index:950}
+.toast.show{opacity:1;transform:none}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><span class="mark">✦</span> FORESIGHT</div>
+  <div class="status">
+    <span><span id="dot-pubcast" class="dotstat checking"></span>PubCast</span>
+    <span><span id="dot-pubpartner" class="dotstat checking"></span>PubPartner</span>
+    <span><span id="dot-2i" class="dotstat checking"></span>2i</span>
+  </div>
+</div>
+
+<div class="anchor">
+  <div class="lantern" id="lanternBtn" title="Open / close tray manager"><span class="spark">✦</span></div>
+  <div class="blades" id="blades"></div>
+</div>
+
+<div class="counter">
+  <div class="counter-surface" id="surface">
+    <div class="counter-hint" id="hint">The Counter is empty.<br>Click the lantern, then the blank blade, to open a program.</div>
+  </div>
+</div>
+
+<div class="modal-veil" id="pickerVeil">
+  <div class="modal">
+    <h2>Open a Program</h2>
+    <div class="sub">Each tray is a real portal into a live, running service.</div>
+    <div class="pgrid" id="pgrid"></div>
+    <button class="modal-close" id="pickerClose">Close</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   CONFIG — edit these if your services run on different ports
+   ============================================================ */
+const CONFIG = {
+  pubpartnerBase: 'http://localhost:8001',
+  twoIBase: 'http://localhost:8787',
+};
+
+/* PubCast rooms are served same-origin from this file's own folder
+   (pubcast/static/), so they're plain relative paths — real pages,
+   not mocked. PubPartner and 2i have no HTML front end in the bundle
+   yet (API-only), so their trays are real live status panels built
+   from their actual /health endpoints — not a fabricated editor UI. */
+const PROGRAMS = [
+  {id:'stage',        label:'Stage',            group:'PubCast', kind:'iframe', url:'stage.html',              w:820, h:560},
+  {id:'panoramic',     label:'360° Panoramic',   group:'PubCast', kind:'iframe', url:'stage_panoramic.html',    w:820, h:560},
+  {id:'control_room',  label:'Control Room',     group:'PubCast', kind:'iframe', url:'control_room.html',       w:860, h:600},
+  {id:'director',      label:'Director Switcher',group:'PubCast', kind:'iframe', url:'director_switcher.html',  w:860, h:600},
+  {id:'world',         label:'World',            group:'PubCast', kind:'iframe', url:'world.html',              w:860, h:600},
+  {id:'dressing',      label:'Dressing Room',    group:'PubCast', kind:'iframe', url:'dressing.html',           w:760, h:560},
+  {id:'teleprompter',  label:'Teleprompter',     group:'PubCast', kind:'iframe', url:'pubcast_teleprompter.html',w:700, h:520},
+  {id:'map',           label:'Map',              group:'PubCast', kind:'iframe', url:'map.html',                w:760, h:560},
+  {id:'gallery',       label:'Gallery',          group:'PubCast', kind:'iframe', url:'gallery.html',            w:700, h:520},
+  {id:'analytics',     label:'Analytics',        group:'PubCast', kind:'iframe', url:'analytics.html',          w:700, h:480},
+  {id:'doctor',        label:'Doctor',           group:'PubCast', kind:'iframe', url:'doctor.html',             w:640, h:480},
+  {id:'pubpartner',    label:'PubPartner (federation)', group:'Federation', kind:'status', service:'pubpartner', w:420, h:360},
+  {id:'twoi',          label:'2i (writers hub)',        group:'Federation', kind:'status', service:'2i',        w:420, h:360},
+];
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let trays = [];          // {id, program, el, x,y,w,h, hidden}
+let topZ = 10;
+let uid = 1;
+const surface = document.getElementById('surface');
+const hint = document.getElementById('hint');
+const STORE_KEY = 'foresight.counter.v1';
+
+function toast(text){
+  const el = document.getElementById('toast');
+  el.textContent = text; el.classList.add('show');
+  clearTimeout(window.__t); window.__t = setTimeout(()=>el.classList.remove('show'), 1900);
+}
+
+function saveState(){
+  try{
+    const data = trays.map(t=>({id:t.id, programId:t.program.id, x:t.x, y:t.y, w:t.w, h:t.h, hidden:t.hidden}));
+    localStorage.setItem(STORE_KEY, JSON.stringify(data));
+  }catch(e){}
+}
+function loadState(){
+  try{ return JSON.parse(localStorage.getItem(STORE_KEY) || '[]'); }catch(e){ return []; }
+}
+
+/* ============================================================
+   TRAY CREATION
+   ============================================================ */
+function clamp(v,min,max){ return Math.max(min, Math.min(v,max)); }
+
+function createTray(program, saved){
+  const rect = surface.getBoundingClientRect();
+  const w = saved?.w || program.w || 700;
+  const h = saved?.h || program.h || 500;
+  let x = saved?.x, y = saved?.y;
+  if(x===undefined || y===undefined){
+    const openCount = trays.filter(t=>!t.hidden).length;
+    x = clamp(40 + (openCount*34) % Math.max(60, rect.width - w - 40), 8, Math.max(8, rect.width - w - 8));
+    y = clamp(30 + (openCount*28) % Math.max(60, rect.height - h - 40), 8, Math.max(8, rect.height - h - 8));
+  }
+
+  const el = document.createElement('div');
+  el.className = 'tray';
+  el.style.left = x+'px'; el.style.top = y+'px'; el.style.width = w+'px'; el.style.height = h+'px';
+  el.innerHTML = `
+    <div class="tray-head">
+      <span class="t-dot" style="background:${program.group==='PubCast' ? 'var(--gold)' : '#7d9fc8'}"></span>
+      <span class="t-title">${program.label}</span>
+      <button class="t-min" title="Hide">–</button>
+      <button class="t-close" title="Close">×</button>
+    </div>
+    <div class="tray-body"></div>
+    <div class="resize-grip"></div>
+  `;
+  surface.appendChild(el);
+
+  const body = el.querySelector('.tray-body');
+  if(program.kind === 'iframe'){
+    const frame = document.createElement('iframe');
+    frame.src = program.url;
+    frame.setAttribute('loading','lazy');
+    body.appendChild(frame);
+  } else if(program.kind === 'status'){
+    body.innerHTML = `<div class="statuswrap">
+      <h3>${program.label}</h3>
+      <div class="sub">Live status — polled every 4s from the real service.</div>
+      <div class="sbody">Connecting…</div>
+    </div>`;
+    pollStatus(program.service, body.querySelector('.sbody'));
+  }
+
+  const tray = {id: saved?.id || ('t'+(uid++)), program, el, x, y, w, h, hidden: !!saved?.hidden};
+  trays.push(tray);
+
+  el.addEventListener('pointerdown', ()=>bringToFront(tray));
+  el.querySelector('.tray-head').addEventListener('pointerdown', e=>startDrag(e, tray));
+  el.querySelector('.resize-grip').addEventListener('pointerdown', e=>startResize(e, tray));
+  el.querySelector('.t-close').addEventListener('click', e=>{ e.stopPropagation(); closeTray(tray); });
+  el.querySelector('.t-min').addEventListener('click', e=>{ e.stopPropagation(); hideTray(tray); });
+
+  bringToFront(tray);
+  if(tray.hidden) el.style.display='none';
+  hint.style.display = 'none';
+  renderBlades();
+  saveState();
+  return tray;
+}
+
+function bringToFront(tray){
+  topZ += 1;
+  tray.el.style.zIndex = topZ;
+  trays.forEach(t=>t.el.classList.remove('focused'));
+  tray.el.classList.add('focused');
+  renderBlades();
+}
+
+function showTray(tray){
+  tray.hidden = false;
+  tray.el.style.display = 'flex';
+  bringToFront(tray);
+  saveState();
+}
+function hideTray(tray){
+  tray.hidden = true;
+  tray.el.style.display = 'none';
+  renderBlades();
+  saveState();
+}
+
+function closeTray(tray){
+  tray.el.classList.add('falling');
+  setTimeout(()=>{
+    tray.el.remove();
+    trays = trays.filter(t=>t!==tray);
+    if(trays.length===0) hint.style.display='flex';
+    renderBlades();
+    saveState();
+  }, 560);
+}
+
+/* ============================================================
+   DRAG / RESIZE
+   ============================================================ */
+function startDrag(e, tray){
+  if(e.target.closest('button')) return;
+  e.preventDefault();
+  bringToFront(tray);
+  tray.el.classList.add('dragging');
+  const rect = surface.getBoundingClientRect();
+  const startX = tray.x, startY = tray.y, sx = e.clientX, sy = e.clientY;
+  function move(ev){
+    tray.x = clamp(startX + (ev.clientX - sx), 4, Math.max(4, rect.width - tray.w - 4));
+    tray.y = clamp(startY + (ev.clientY - sy), 4, Math.max(4, rect.height - tray.h - 4));
+    tray.el.style.left = tray.x+'px'; tray.el.style.top = tray.y+'px';
+  }
+  function up(){
+    tray.el.classList.remove('dragging');
+    window.removeEventListener('pointermove', move);
+    window.removeEventListener('pointerup', up);
+    saveState();
+  }
+  window.addEventListener('pointermove', move);
+  window.addEventListener('pointerup', up, {once:true});
+}
+
+function startResize(e, tray){
+  e.preventDefault(); e.stopPropagation();
+  bringToFront(tray);
+  tray.el.classList.add('resizing');
+  const rect = surface.getBoundingClientRect();
+  const startW = tray.w, startH = tray.h, sx = e.clientX, sy = e.clientY;
+  function move(ev){
+    tray.w = clamp(startW + (ev.clientX - sx), 280, rect.width - tray.x - 8);
+    tray.h = clamp(startH + (ev.clientY - sy), 180, rect.height - tray.y - 8);
+    tray.el.style.width = tray.w+'px'; tray.el.style.height = tray.h+'px';
+  }
+  function up(){
+    tray.el.classList.remove('resizing');
+    window.removeEventListener('pointermove', move);
+    window.removeEventListener('pointerup', up);
+    saveState();
+  }
+  window.addEventListener('pointermove', move);
+  window.addEventListener('pointerup', up, {once:true});
+}
+
+/* ============================================================
+   FAN / BLADES (open-tray manager)
+   ============================================================ */
+function renderBlades(){
+  const wrap = document.getElementById('blades');
+  wrap.innerHTML = '';
+  trays.forEach(tray=>{
+    const b = document.createElement('button');
+    b.className = 'blade' + (tray.el.classList.contains('focused') && !tray.hidden ? ' active' : '');
+    b.innerHTML = `<span class="b-ico">${tray.hidden?'○':'●'}</span><span>${tray.program.label}</span><span class="b-close">×</span>`;
+    b.addEventListener('click', e=>{
+      if(e.target.classList.contains('b-close')){ closeTray(tray); return; }
+      if(tray.hidden){ showTray(tray); }
+      else if(tray.el.classList.contains('focused')){ hideTray(tray); }
+      else { bringToFront(tray); }
+    });
+    wrap.appendChild(b);
+  });
+  const blank = document.createElement('button');
+  blank.className = 'blade blank';
+  blank.textContent = '+ open program';
+  blank.addEventListener('click', openPicker);
+  wrap.appendChild(blank);
+}
+
+/* ============================================================
+   PICKER
+   ============================================================ */
+function openPicker(){
+  const grid = document.getElementById('pgrid');
+  grid.innerHTML = '';
+  const groups = {};
+  PROGRAMS.forEach(p=>{ (groups[p.group] = groups[p.group]||[]).push(p); });
+  Object.keys(groups).forEach(g=>{
+    groups[g].forEach(p=>{
+      const item = document.createElement('button');
+      item.className = 'pitem';
+      item.innerHTML = `<b>${p.label}</b><span>${g}</span>`;
+      item.addEventListener('click', ()=>{
+        createTray(p);
+        document.getElementById('pickerVeil').classList.remove('open');
+        toast('Opened '+p.label);
+      });
+      grid.appendChild(item);
+    });
+  });
+  document.getElementById('pickerVeil').classList.add('open');
+}
+let bladesOpen = true;
+document.getElementById('lanternBtn').addEventListener('click', ()=>{
+  bladesOpen = !bladesOpen;
+  document.getElementById('blades').style.display = bladesOpen ? 'flex' : 'none';
+});
+document.getElementById('pickerClose').addEventListener('click', ()=>document.getElementById('pickerVeil').classList.remove('open'));
+document.getElementById('pickerVeil').addEventListener('click', e=>{ if(e.target.id==='pickerVeil') e.currentTarget.classList.remove('open'); });
+
+/* ============================================================
+   LIVE STATUS — real fetches against the real services, no mock data
+   ============================================================ */
+async function pollOnce(service){
+  const base = service==='pubpartner' ? CONFIG.pubpartnerBase : CONFIG.twoIBase;
+  const res = await fetch(base + '/health', {mode:'cors'});
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  return res.json();
+}
+
+function renderPubPartnerStatus(container, data){
+  container.innerHTML = `
+    <div class="srow"><span>Status</span><span class="pill ok">${data.status}</span></div>
+    <div class="srow"><span>Role</span><span>${data.role || '—'}</span></div>
+    <div class="srow"><span>Node ID</span><span>${data.node_id || '—'}</span></div>
+    <div class="srow"><span>Protocol</span><span>${data.protocol || '—'}</span></div>
+    <div class="srow"><span>Auth configured</span><span>${data.auth_configured ? 'yes' : 'no'}</span></div>
+  `;
+}
+function renderTwoIStatus(container, data){
+  const env = data.environment || {};
+  const svc = data.services || {};
+  container.innerHTML = `
+    <div class="srow"><span>Status</span><span class="pill ok">${data.status}</span></div>
+    <div class="srow"><span>Service</span><span>${data.service || '—'}</span></div>
+    <div class="srow"><span>Uptime</span><span>${data.uptime!=null ? data.uptime+'s' : '—'}</span></div>
+    <div class="srow"><span>Node</span><span>${env.node_version || '—'}</span></div>
+    <div class="srow"><span>Messages in history</span><span>${svc.message_history ?? '—'}</span></div>
+  `;
+}
+
+function pollStatus(service, container){
+  let stopped = false;
+  container.closest('.tray')?.addEventListener?.('DOMNodeRemoved', ()=>{ stopped = true; });
+  async function tick(){
+    if(stopped || !document.body.contains(container)) return;
+    try{
+      const data = await pollOnce(service);
+      if(service==='pubpartner') renderPubPartnerStatus(container, data);
+      else renderTwoIStatus(container, data);
+    }catch(err){
+      container.innerHTML = `<div class="srow"><span>Status</span><span class="pill bad">unreachable</span></div>
+        <div class="serr">${(''+err).replace(/</g,'&lt;')}<br>Is the ${service==='pubpartner'?'PubPartner federation':'2i-backend'} process running on ${service==='pubpartner'?CONFIG.pubpartnerBase:CONFIG.twoIBase}?</div>`;
+    }
+    if(!stopped) setTimeout(tick, 4000);
+  }
+  tick();
+}
+
+/* ============================================================
+   TOP-BAR SERVICE DOTS
+   ============================================================ */
+async function checkDot(id, url){
+  const dot = document.getElementById(id);
+  try{
+    const res = await fetch(url, {mode:'cors'});
+    dot.className = 'dotstat ' + (res.ok ? 'up' : 'down');
+  }catch(e){
+    dot.className = 'dotstat down';
+  }
+}
+function refreshDots(){
+  checkDot('dot-pubcast', '/health');
+  checkDot('dot-pubpartner', CONFIG.pubpartnerBase + '/health');
+  checkDot('dot-2i', CONFIG.twoIBase + '/health');
+}
+refreshDots();
+setInterval(refreshDots, 6000);
+
+/* ============================================================
+   BOOT — restore saved layout, or start empty
+   ============================================================ */
+(function boot(){
+  const saved = loadState();
+  if(saved.length){
+    saved.forEach(s=>{
+      const program = PROGRAMS.find(p=>p.id===s.programId);
+      if(program) createTray(program, s);
+    });
+  } else {
+    renderBlades();
+  }
+})();
+</script>
+</body>
+</html>
