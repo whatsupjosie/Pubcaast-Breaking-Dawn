@@ -1,0 +1,17 @@
+{
+  "user_id": "claude_integration_test",
+  "current_state": "guide",
+  "user_battery": "charged",
+  "conversation_count": 0,
+  "last_interaction": "2026-08-19T08:24:24.055189",
+  "state_entered_at": "2026-08-19T08:24:24.054666",
+  "saved_at": "2026-08-19T08:24:24.056285",
+  "user_state": {
+    "energy_level": 0.5,
+    "stress_level": 0.0,
+    "clarity_score": 1.0,
+    "emotional_tone": "neutral",
+    "typing_speed": 60.0,
+    "time_of_day": "unknown"
+  }
+}

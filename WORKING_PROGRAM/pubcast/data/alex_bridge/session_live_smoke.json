@@ -1,0 +1,26 @@
+{
+  "session_id": "live_smoke",
+  "packets": {
+    "default": {
+      "user_id": "default",
+      "session_id": "live_smoke",
+      "project_id": "default",
+      "room_id": "default",
+      "alex_state": "guide",
+      "user_battery": "charged",
+      "tone_guidance": "steady",
+      "pace_guidance": "normal",
+      "intervention_style": "light",
+      "fragility_level": 0.1,
+      "care_priority": "low",
+      "do_not_touch": [],
+      "active_threads": [],
+      "resumed_from_memory": false,
+      "remembered_memory_count": 0,
+      "recent_memory_types": [],
+      "display_name": "default",
+      "bridge_scope": "entry",
+      "generated_at": 1781499609.8265288
+    }
+  }
+}

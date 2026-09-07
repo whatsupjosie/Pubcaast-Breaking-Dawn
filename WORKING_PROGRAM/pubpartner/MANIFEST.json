@@ -1,0 +1,13 @@
+{
+  "name": "PubPartner Federation",
+  "version": "0.1.0",
+  "status": "implementation-foundation",
+  "destructive_changes": false,
+  "source_basis": [
+    "PubCast_2i_PubPartner_Integration_Handoff_2026-08-16.md",
+    "PubPartner_Donor_Audit.md",
+    "2i_writers_room_v21_fixed.html",
+    "pub_partner_ui_v2.html",
+    "foresight_ui_v17.html"
+  ]
+}

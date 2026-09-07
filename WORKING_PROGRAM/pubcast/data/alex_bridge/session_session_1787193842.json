@@ -1,0 +1,26 @@
+{
+  "session_id": "session_1787193842",
+  "packets": {
+    "test_guest": {
+      "user_id": "test_guest",
+      "session_id": "session_1787193842",
+      "project_id": "default",
+      "room_id": "dressing_29291cb3404c8ceb",
+      "alex_state": "guide",
+      "user_battery": "charged",
+      "tone_guidance": "steady",
+      "pace_guidance": "normal",
+      "intervention_style": "light",
+      "fragility_level": 0.1,
+      "care_priority": "low",
+      "do_not_touch": [],
+      "active_threads": [],
+      "resumed_from_memory": false,
+      "remembered_memory_count": 0,
+      "recent_memory_types": [],
+      "display_name": "Test Guest",
+      "bridge_scope": "entry",
+      "generated_at": 1787193842.690518
+    }
+  }
+}

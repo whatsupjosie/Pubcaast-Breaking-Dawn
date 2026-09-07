@@ -1,0 +1,17 @@
+{
+  "user_id": "test_guest",
+  "current_state": "guide",
+  "user_battery": "charged",
+  "conversation_count": 0,
+  "last_interaction": "2026-08-20T02:44:02.689091",
+  "state_entered_at": "2026-08-20T02:44:02.688900",
+  "saved_at": "2026-08-20T02:44:02.691066",
+  "user_state": {
+    "energy_level": 0.5000000518333333,
+    "stress_level": 0.0,
+    "clarity_score": 1.0,
+    "emotional_tone": "neutral",
+    "typing_speed": 60.0,
+    "time_of_day": "unknown"
+  }
+}

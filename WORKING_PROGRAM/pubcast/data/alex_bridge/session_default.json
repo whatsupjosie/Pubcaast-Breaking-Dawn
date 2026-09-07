@@ -1,0 +1,30 @@
+{
+  "session_id": "default",
+  "packets": {
+    "default": {
+      "user_id": "default",
+      "session_id": "default",
+      "project_id": "default",
+      "room_id": "default",
+      "alex_state": "guide",
+      "user_battery": "charged",
+      "tone_guidance": "steady",
+      "pace_guidance": "normal",
+      "intervention_style": "light",
+      "fragility_level": 0.0,
+      "care_priority": "low",
+      "do_not_touch": [],
+      "active_threads": [
+        "default"
+      ],
+      "resumed_from_memory": true,
+      "remembered_memory_count": 1,
+      "recent_memory_types": [
+        "factual"
+      ],
+      "display_name": "default",
+      "bridge_scope": "entry",
+      "generated_at": 1786926488.3068948
+    }
+  }
+}
