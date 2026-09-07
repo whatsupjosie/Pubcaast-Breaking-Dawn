@@ -1030,12 +1030,16 @@ async def lifespan(application: FastAPI):
     # init_peq() must be called before create_peq_router() so the broker
     # is initialised and PEQSystem is loaded. Without this call, every
     # request returns degraded signals silently.
-    # peq_package_path points to modules/peq/ so the broker can add it
-    # to sys.path and do 'from peq.system import PEQSystem' correctly.
-    # cre_eq/ must be at repo root (beside modules/) for the same reason.
+    # peq_package_path must be modules/ (the PARENT of modules/peq/), not
+    # modules/peq/ itself — _load_peq() does sys.path.insert(0, path) then
+    # `from peq.system import PEQSystem`, which only resolves if `path`
+    # contains a peq/ subdirectory. Passing modules/peq/ directly made it
+    # look for modules/peq/peq/system.py, which never existed — PEQ silently
+    # ran degraded from the moment it was wired in. cre_eq/ lives alongside
+    # peq/ under modules/, so the same corrected path covers both imports.
     if _HAS_PEQ and create_peq_router is not None and init_peq is not None:
         try:
-            peq_path = str(Path(__file__).resolve().parent / "modules" / "peq")
+            peq_path = str(Path(__file__).resolve().parent / "modules")
             peq_loaded = init_peq(peq_package_path=peq_path)
             application.include_router(create_peq_router())
             logger.info("[6f] PEQ system ready — /api/peq/* (full=%s)", peq_loaded)
